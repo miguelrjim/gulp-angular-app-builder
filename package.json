@@ -1,13 +1,13 @@
 {
-  "name": "gulp-<%= pluginName %>",
-  "version": "0.0.0",
+  "name": "gulp-angular-app-builder",
+  "version": "0.0.1",
   "description": "",
   "license": "MIT",
-  "repository": "<%= githubUsername %>/gulp-<%= pluginName %>",
+  "repository": "miguelrjim/gulp-angular-app-builder",
   "author": {
     "name": "<%= name %>",
     "email": "<%= email %>",
-    "url": "https://github.com/<%= githubUsername %>"
+    "url": "https://github.com/miguelrjim"
   },
   "engines": {
     "node": ">=0.10.0"
@@ -22,8 +22,13 @@
     "gulpplugin"
   ],
   "dependencies": {
+    "glob": "^5.0.5",
+    "gulp-concat": "^2.5.2",
     "gulp-util": "^3.0.1",
-    "through2": "^0.6.3"
+    "lodash": "^3.7.0",
+    "nedb": "^1.1.2",
+    "through2": "^0.6.3",
+    "vinyl-fs": "^1.0.0"
   },
   "devDependencies": {
     "mocha": "*"
