@@ -1,13 +1,13 @@
 {
   "name": "gulp-angular-app-builder",
   "version": "0.0.1",
-  "description": "",
+  "description": "Automatically include dependencies files into angular app declarations (to be use in conjunction with gulp-angular-dependencies-builder)",
   "license": "MIT",
   "repository": "miguelrjim/gulp-angular-app-builder",
   "author": {
-    "name": "<%= name %>",
-    "email": "<%= email %>",
-    "url": "https://github.com/miguelrjim"
+    "name": "Miguel Jimenez",
+    "email": "miguel.ricardo.jimenez.gomez@gmail.com",
+    "url": "https://github.com/miguelrim"
   },
   "engines": {
     "node": ">=0.10.0"
