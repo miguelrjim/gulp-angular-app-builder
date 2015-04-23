@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) <%= name %> <<%= email %>>
+Copyright (c) Miguel Jimenez miguel.ricardo.jimenez.gomez@gmail.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

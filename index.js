@@ -10,11 +10,11 @@ var vinyl_fs = require('vinyl-fs');
 
 module.exports = function (options) {
 	if (!options.db) {
-		throw new gutil.PluginError('gulp-<%= pluginName %>', '`db` required');
+		throw new gutil.PluginError('gulp-angular-app-builder', '`db` required');
 	}
 
   // Regex to get dependencies of module
-  var moduleRegex = /\.module\(\s*(?:'|")[^'"]+(?:'|")\s*,\s*(\[[^\]]*\])/;
+  var moduleRegex = /\.module\(\s*(?:'|")[^'"]+(?:'|")\s*,\s*(\[[^\]]*\])/g;
 
 	// Load specified database
 	var db = new nedb({
@@ -30,18 +30,25 @@ module.exports = function (options) {
 		}
 
 		if (file.isStream()) {
-			cb(new gutil.PluginError('gulp-<%= pluginName %>', 'Streaming not supported'));
+			cb(new gutil.PluginError('gulp-angular-app-builder', 'Streaming not supported'));
 			return;
 		}
 
 		// Get dependencies needed for the file
-		var dependencies = moduleRegex.exec(file.contents.toString())[1];
+    var contents = file.contents.toString();
+		var dependenciesStr;
+    var dependencies = [];
+    
+    // Get multiple dependencies for possible multiple module definitions
+    while(dependenciesStr = moduleRegex.exec(contents))
+      dependencies = dependencies.concat(eval(dependenciesStr));
+
     var dependenciesAdded = [];
     var filesToAdd = [];
     var filesBuffers = [];
     var that = this;
 
-		if(!dependencies) {
+		if(dependencies.length == 0) {
 			this.push(file);
 			cb();
 			return;

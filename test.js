@@ -1,10 +1,10 @@
 'use strict';
 var assert = require('assert');
 var gutil = require('gulp-util');
-var <%= camelPluginName %> = require('./');
+var gulpAngularAppBuilder = require('./');
 
 it('should ', function (cb) {
-	var stream = <%= camelPluginName %>();
+	var stream = gulpAngularAppBuilder();
 
 	stream.on('data', function (file) {
 		assert.strictEqual(file.contents.toString(), 'unicorns');
