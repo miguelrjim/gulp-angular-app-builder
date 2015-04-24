@@ -7,54 +7,42 @@ var _ = require('lodash');
 var concat = require('gulp-concat');
 var path = require('path');
 var vinyl_fs = require('vinyl-fs');
+var fs = require('fs');
 
 module.exports = function (options) {
-	if (!options.db) {
-		throw new gutil.PluginError('gulp-angular-app-builder', '`db` required');
-	}
+  if (!options.db) {
+    throw new gutil.PluginError('gulp-angular-app-builder', '`db` required');
+  }
 
   // Regex to get dependencies of module
   var moduleRegex = /\.module\(\s*(?:'|")[^'"]+(?:'|")\s*,\s*(\[[^\]]*\])/g;
 
-	// Load specified database
-	var db = new nedb({
-		filename: options.db,
-		autoload: true
-	});
+  // Load specified database
+  var db = options.db;
 
-	return through.obj(function (file, enc, cb) {
+  return through.obj(function (file, enc, cb) {
 
-		if (file.isNull()) {
-			cb(null, file);
-			return;
-		}
-
-		if (file.isStream()) {
-			cb(new gutil.PluginError('gulp-angular-app-builder', 'Streaming not supported'));
-			return;
-		}
-
-		// Get dependencies needed for the file
-    var contents = file.contents.toString();
-		var dependenciesStr;
     var dependencies = [];
-    
-    // Get multiple dependencies for possible multiple module definitions
-    while(dependenciesStr = moduleRegex.exec(contents))
-      dependencies = dependencies.concat(eval(dependenciesStr));
-
     var dependenciesAdded = [];
     var filesToAdd = [];
-    var filesBuffers = [];
     var that = this;
 
-		if(dependencies.length == 0) {
-			this.push(file);
-			cb();
-			return;
-		}
-
-    dependencies = eval(dependencies);  
+    // Get dependencies needed for the file
+    db.find({
+      path: file.path.substr(process.cwd().length+1)
+    }, function(err, docs) {
+      docs.forEach(function(doc) {
+        dependencies = dependencies.concat(doc.dependencies);
+      })
+      if(dependencies.length == 0)
+        fs.readFile(file.path, function(err, data) {
+          file.contents = data;
+          that.push(file);
+          cb();
+        })
+      else
+        look();
+    })
 
     // Look up the database for the needed dependencies
     function lookForDependencies(fn) {
@@ -77,33 +65,37 @@ module.exports = function (options) {
       })
     }
 
-    lookForDependencies(function() {
-      if(filesToAdd.length == 0) {
-        that.push(file);
-        cb();
-        return;
-      }
-
-      filesToAdd = _.uniq(filesToAdd);
-
-      vinyl_fs.src(filesToAdd)
-        .pipe(through.obj(function(file, enc, cb) {
-          this.push(file);
-          cb();
-        }, function(cb) {
-          this.push(file);
-          cb();
-        }))
-        .pipe(concat(path.basename(file.relative)))
-        .pipe(through.obj(
-          function(file, enc, icb) {
+    function look() {
+      lookForDependencies(function() {
+        if(filesToAdd.length == 0) {
+          fs.readFile(file.path, function(err, data) {
+            file.contents = data;
             that.push(file);
-            icb();
             cb();
-          }
-        ));
+          });
+          return;
+        }
 
-    });
+        filesToAdd = _.uniq(filesToAdd);
 
-	});
+        vinyl_fs.src(filesToAdd)
+          .pipe(through.obj(function(file, enc, cb) {
+            this.push(file);
+            cb();
+          }, function(cb) {
+            this.push(file);
+            cb();
+          }))
+          .pipe(concat(path.basename(file.relative)))
+          .pipe(through.obj(
+            function(file, enc, icb) {
+              that.push(file);
+              icb();
+              cb();
+            }
+          ));
+      });
+    }
+
+  });
 };
